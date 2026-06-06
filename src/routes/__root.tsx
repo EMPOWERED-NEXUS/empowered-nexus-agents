@@ -79,15 +79,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "EduBox Agent Studio — EmpowerEd Nexus" },
-      { name: "description", content: "Offline-first AI lesson packs for low-connectivity schools." },
+      { title: "EduBox Agent Studio | EmpowerEd Nexus" },
+      { name: "description", content: "Offline-first AI lesson packs for low-connectivity schools. AI-powered offline-ready lesson packs for low-connectivity schools." },
       { name: "author", content: "EmpowerEd Nexus" },
-      { property: "og:title", content: "EduBox Agent Studio — EmpowerEd Nexus" },
-      { property: "og:description", content: "Offline-first AI lesson packs for low-connectivity schools." },
+      { property: "og:title", content: "EduBox Agent Studio | EmpowerEd Nexus" },
+      { property: "og:description", content: "Offline-first AI lesson packs for low-connectivity schools. AI-powered offline-ready lesson packs for low-connectivity schools." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:title", content: "EduBox Agent Studio — EmpowerEd Nexus" },
-      { name: "twitter:description", content: "Offline-first AI lesson packs for low-connectivity schools." },
+      { name: "twitter:title", content: "EduBox Agent Studio | EmpowerEd Nexus" },
+      { name: "twitter:description", content: "Offline-first AI lesson packs for low-connectivity schools. AI-powered offline-ready lesson packs for low-connectivity schools." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/frSdtMKIAzPVgsZ0G8QUiy72BDJ3/social-images/social-1780782385029-AI_studio_agent.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/frSdtMKIAzPVgsZ0G8QUiy72BDJ3/social-images/social-1780782385029-AI_studio_agent.webp" },
     ],
     links: [
       {
