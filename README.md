@@ -93,6 +93,14 @@ Prototype built for the **Google for Startups AI Agents Challenge**.
 - **Demo video:** _TODO: add link_
 - **Team / contact:** info@empowerednexus.com — https://www.empowerednexus.com
 
+## Ecosystem roadmap
+
+EduBox Agent Studio is the first project inside the EmpowerEd Nexus Agents Platform. Future
+integrations may connect generated lesson packs with [NexusAccess AI](https://nexusaccess.empowerednexus.com),
+which supports inclusive access formats such as SMS, USSD, voice scripts, visual learning cards,
+caption-supported content, and offline EduBox package preparation. This is a planned ecosystem
+connection — not a live integration in this repository.
+
 ## Future roadmap
 
 - **Google Gemini** — wire live generation through the Gemini API for lesson packs, quizzes, and flashcards

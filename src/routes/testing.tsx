@@ -111,6 +111,26 @@ function TestingPage() {
             <Link to="/examshield" className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90">Open ExamShield</Link>
           </div>
         </div>
+
+        <div className="mt-8 rounded-3xl border border-border bg-card p-6 text-sm text-muted-foreground">
+          <div className="font-semibold text-foreground">Related ecosystem platform</div>
+          <p className="mt-2">
+            <a
+              href="https://nexusaccess.empowerednexus.com"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-brand-green hover:underline"
+            >
+              NexusAccess AI
+            </a>
+            {" — "}
+            <span className="text-foreground">https://nexusaccess.empowerednexus.com</span>
+          </p>
+          <p className="mt-2">
+            This is not required to test the EduBox Agent Studio MVP. It is included to show the
+            wider EmpowerEd Nexus roadmap for inclusive education access.
+          </p>
+        </div>
       </section>
     </SiteLayout>
   );

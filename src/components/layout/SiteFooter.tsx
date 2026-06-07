@@ -18,6 +18,8 @@ export function SiteFooter() {
           <div className="mb-2 font-semibold text-foreground">Contact</div>
           <a href="mailto:info@empowerednexus.com" className="block text-muted-foreground hover:text-foreground">info@empowerednexus.com</a>
           <a href="https://www.empowerednexus.com" target="_blank" rel="noreferrer" className="block text-muted-foreground hover:text-foreground">www.empowerednexus.com</a>
+          <div className="mb-2 mt-5 font-semibold text-foreground">Ecosystem</div>
+          <a href="https://nexusaccess.empowerednexus.com" target="_blank" rel="noreferrer" className="block text-muted-foreground hover:text-foreground">NexusAccess AI</a>
         </div>
         <div className="text-sm text-muted-foreground md:text-right">
           © {new Date().getFullYear()} EmpowerEd Nexus.<br />

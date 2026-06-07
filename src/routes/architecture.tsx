@@ -33,6 +33,22 @@ const EXAM_NODES = [
   { title: "Audit Evidence", sub: "QR/watermark trace + results audit" },
 ];
 
+const ECOSYSTEM_CURRENT = [
+  { title: "Teacher Input", sub: "Topic, subject, grade, curriculum context" },
+  { title: "EduBox Agent Studio", sub: "LessonCraft and ExamShield agent workflows" },
+  { title: "Offline Lesson Pack", sub: "Structured pack for classroom deployment" },
+  { title: "EduBox Deployment", sub: "Micro-cloud sync at school" },
+];
+
+const ECOSYSTEM_FUTURE = [
+  { title: "Future Access Layer", sub: "Planned ecosystem connection (roadmap)" },
+  { title: "NexusAccess AI", sub: "Inclusive access layer for multi-format delivery" },
+  {
+    title: "Multi-format Output",
+    sub: "SMS, USSD, voice scripts, visual learning cards, captions, EduBox packages",
+  },
+];
+
 function ArchitecturePage() {
   return (
     <SiteLayout>
@@ -49,6 +65,20 @@ function ArchitecturePage() {
         <h2 className="mt-12 text-xl font-bold tracking-tight text-foreground">ExamShield workflow</h2>
         <p className="mt-1 text-sm text-muted-foreground">Simulated secure exam integrity for paper-based exams (prototype, mock data only).</p>
         <FlowGrid nodes={EXAM_NODES} />
+
+        <h2 className="mt-12 text-xl font-bold tracking-tight text-foreground">
+          Future Ecosystem Integration
+        </h2>
+        <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
+          NexusAccess AI is planned as the inclusive access layer that can help convert
+          agent-generated learning content into formats suitable for different devices, abilities,
+          languages, and connectivity realities.
+        </p>
+        <FlowGrid nodes={ECOSYSTEM_CURRENT} />
+        <p className="mt-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          Planned connection (roadmap)
+        </p>
+        <FlowGrid nodes={ECOSYSTEM_FUTURE} />
 
         <div className="mt-10 grid gap-4 md:grid-cols-3">
           <Tech title="Frontend" body="React 19, TanStack Start, Tailwind v4 with EmpowerEd Nexus brand tokens." />

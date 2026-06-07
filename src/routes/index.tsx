@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { BrandLockup } from "@/components/brand/Logo";
-import { BookOpen, BrainCircuit, ClipboardList, GraduationCap, Layers, Package, Sparkles, WifiOff, ArrowRight, CheckCircle2, FileText, ShieldCheck } from "lucide-react";
+import { BookOpen, BrainCircuit, ClipboardList, GraduationCap, Layers, Package, Sparkles, WifiOff, ArrowRight, CheckCircle2, FileText, ShieldCheck, Accessibility, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -129,6 +129,51 @@ function Index() {
         </div>
       </section>
 
+      {/* Ecosystem */}
+      <section className="mx-auto max-w-7xl px-5 py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+            Part of the EmpowerEd Nexus Agents Ecosystem
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            EduBox Agent Studio is the first agent workspace in the wider EmpowerEd Nexus Agents
+            Platform. It starts with offline-ready lesson packs and exam integrity workflows, then
+            connects to future tools such as NexusAccess AI for inclusive access formats.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <EcosystemCard
+            icon={BookOpen}
+            title="EduBox Agent Studio"
+            desc="Creates offline-ready lesson packs for teachers."
+            to="/create"
+          />
+          <EcosystemCard
+            icon={ShieldCheck}
+            title="ExamShield"
+            desc="Simulates secure exam package delivery, centre readiness, controlled printing, traceability, and audit evidence."
+            to="/examshield"
+          />
+          <EcosystemCard
+            icon={Accessibility}
+            title="NexusAccess AI"
+            desc="Future inclusive access layer for SMS, USSD, voice scripts, visual learning cards, captions, and EduBox package preparation."
+            href="https://nexusaccess.empowerednexus.com"
+            badge="Future integration"
+          />
+        </div>
+        <div className="mt-8 text-center">
+          <a
+            href="https://nexusaccess.empowerednexus.com"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground transition hover:bg-muted"
+          >
+            Explore NexusAccess AI <ExternalLink className="h-4 w-4" />
+          </a>
+        </div>
+      </section>
+
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-5 pb-16">
         <div className="overflow-hidden rounded-3xl bg-primary p-10 text-primary-foreground md:p-14">
@@ -144,6 +189,56 @@ function Index() {
         </div>
       </section>
     </SiteLayout>
+  );
+}
+
+function EcosystemCard({
+  icon: Icon,
+  title,
+  desc,
+  to,
+  href,
+  badge,
+}: {
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+  to?: string;
+  href?: string;
+  badge?: string;
+}) {
+  const inner = (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-brand-gradient text-primary-foreground">
+          <Icon className="h-5 w-5" />
+        </div>
+        {badge && (
+          <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+            {badge}
+          </span>
+        )}
+      </div>
+      <div className="mt-4 text-base font-semibold text-foreground">{title}</div>
+      <p className="mt-1 text-sm text-muted-foreground">{desc}</p>
+    </>
+  );
+
+  const cls =
+    "rounded-3xl border border-border bg-card p-6 shadow-sm transition hover:shadow-md";
+
+  if (href) {
+    return (
+      <a href={href} target="_blank" rel="noreferrer" className={cls}>
+        {inner}
+      </a>
+    );
+  }
+
+  return (
+    <Link to={to!} className={cls}>
+      {inner}
+    </Link>
   );
 }
 
