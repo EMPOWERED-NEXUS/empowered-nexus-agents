@@ -61,6 +61,11 @@ function TestingPage() {
             </div>
           </div>
 
+          <div className="mt-6 rounded-2xl border border-border bg-background p-4 text-sm text-muted-foreground">
+            The Create Pack form supports African school systems with country, subject, class, and
+            language dropdowns plus Other fields for local curriculum flexibility.
+          </div>
+
           <div className="mt-8 flex flex-wrap gap-3">
             <Link to="/create" className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90">Run the test now</Link>
             <Link to="/architecture" className="rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-foreground hover:bg-muted">View architecture</Link>
