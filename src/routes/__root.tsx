@@ -10,7 +10,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { reportError } from "../lib/error-reporting";
 import { Toaster } from "sonner";
 import favicon from "@/assets/brand/empowered-nexus-favicon.png.asset.json";
 
@@ -40,7 +40,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    reportError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
@@ -80,16 +80,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "EduBox Agent Studio | EmpowerEd Nexus" },
-      { name: "description", content: "Offline-first AI lesson packs for low-connectivity schools. AI-powered offline-ready lesson packs for low-connectivity schools." },
+      { name: "description", content: "AI-powered offline-ready lesson packs for low-connectivity schools." },
       { name: "author", content: "EmpowerEd Nexus" },
       { property: "og:title", content: "EduBox Agent Studio | EmpowerEd Nexus" },
-      { property: "og:description", content: "Offline-first AI lesson packs for low-connectivity schools. AI-powered offline-ready lesson packs for low-connectivity schools." },
+      { property: "og:description", content: "AI-powered offline-ready lesson packs for low-connectivity schools." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:title", content: "EduBox Agent Studio | EmpowerEd Nexus" },
-      { name: "twitter:description", content: "Offline-first AI lesson packs for low-connectivity schools. AI-powered offline-ready lesson packs for low-connectivity schools." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/frSdtMKIAzPVgsZ0G8QUiy72BDJ3/social-images/social-1780782385029-AI_studio_agent.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/frSdtMKIAzPVgsZ0G8QUiy72BDJ3/social-images/social-1780782385029-AI_studio_agent.webp" },
+      { name: "twitter:description", content: "AI-powered offline-ready lesson packs for low-connectivity schools." },
     ],
     links: [
       {

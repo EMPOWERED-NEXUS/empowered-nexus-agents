@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/layout/SiteLayout";
 import { BrandLockup } from "@/components/brand/Logo";
-import { BookOpen, BrainCircuit, ClipboardList, GraduationCap, Layers, Package, Sparkles, WifiOff, ArrowRight, CheckCircle2, FileText } from "lucide-react";
+import { BookOpen, BrainCircuit, ClipboardList, GraduationCap, Layers, Package, Sparkles, WifiOff, ArrowRight, CheckCircle2, FileText, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -68,6 +68,32 @@ function Index() {
         </div>
       </section>
 
+      {/* Two workflows */}
+      <section className="mx-auto max-w-7xl px-5 py-16">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">Two workflows, one EduBox studio</h2>
+          <p className="mt-3 text-muted-foreground">Choose a mode to explore. Both run as offline-first prototype agent workflows.</p>
+        </div>
+        <div className="mt-10 grid gap-6 md:grid-cols-2">
+          <ModeCard
+            to="/create"
+            icon={BookOpen}
+            tag="LessonCraft"
+            title="Generate offline EduBox lesson packs."
+            desc="Turn a topic into a complete, EduBox-ready lesson pack — objectives, teacher explanation, student notes, quiz, flashcards, revision summary and evidence report."
+            cta="Open LessonCraft"
+          />
+          <ModeCard
+            to="/examshield"
+            icon={ShieldCheck}
+            tag="ExamShield"
+            title="Simulate secure exam package delivery."
+            desc="Demonstrate centre printing, traceability, and results audit for paper-based exams with encrypted packages, time-locks, QR/watermark tracing and audit evidence."
+            cta="Open ExamShield"
+          />
+        </div>
+      </section>
+
       {/* Agents */}
       <section className="mx-auto max-w-7xl px-5 py-16">
         <div className="mx-auto max-w-2xl text-center">
@@ -118,6 +144,39 @@ function Index() {
         </div>
       </section>
     </SiteLayout>
+  );
+}
+
+function ModeCard({
+  to,
+  icon: Icon,
+  tag,
+  title,
+  desc,
+  cta,
+}: {
+  to: string;
+  icon: React.ElementType;
+  tag: string;
+  title: string;
+  desc: string;
+  cta: string;
+}) {
+  return (
+    <Link
+      to={to}
+      className="group flex flex-col rounded-3xl border border-border bg-card p-8 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
+    >
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-gradient text-primary-foreground">
+        <Icon className="h-7 w-7" />
+      </div>
+      <div className="mt-5 text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">{tag}</div>
+      <div className="mt-1 text-xl font-bold tracking-tight text-foreground">{title}</div>
+      <p className="mt-2 flex-1 text-sm text-muted-foreground">{desc}</p>
+      <div className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-foreground">
+        {cta} <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+      </div>
+    </Link>
   );
 }
 

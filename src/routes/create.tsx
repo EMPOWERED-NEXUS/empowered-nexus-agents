@@ -104,7 +104,7 @@ function CreatePage() {
           </div>
 
           <div className="mt-8 flex items-center justify-between gap-4">
-            <p className="text-xs text-muted-foreground">Mock AI for now. Gemini API wiring is structurally ready in <code className="rounded bg-muted px-1.5 py-0.5">src/lib/lesson.ts</code>.</p>
+            <p className="text-xs text-muted-foreground">Demo generation flow — a structured lesson-pack simulation. Gemini-ready architecture: API wiring lives in <code className="rounded bg-muted px-1.5 py-0.5">src/lib/lesson.ts</code>.</p>
             <button
               type="submit"
               disabled={loading}

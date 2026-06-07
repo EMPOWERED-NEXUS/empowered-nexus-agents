@@ -13,6 +13,7 @@ import { Route as TestingRouteImport } from './routes/testing'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ImpactRouteImport } from './routes/impact'
 import { Route as GeneratedRouteImport } from './routes/generated'
+import { Route as ExamshieldRouteImport } from './routes/examshield'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as ArchitectureRouteImport } from './routes/architecture'
@@ -36,6 +37,11 @@ const ImpactRoute = ImpactRouteImport.update({
 const GeneratedRoute = GeneratedRouteImport.update({
   id: '/generated',
   path: '/generated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExamshieldRoute = ExamshieldRouteImport.update({
+  id: '/examshield',
+  path: '/examshield',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/architecture': typeof ArchitectureRoute
   '/create': typeof CreateRoute
   '/dashboard': typeof DashboardRoute
+  '/examshield': typeof ExamshieldRoute
   '/generated': typeof GeneratedRoute
   '/impact': typeof ImpactRoute
   '/saved': typeof SavedRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/architecture': typeof ArchitectureRoute
   '/create': typeof CreateRoute
   '/dashboard': typeof DashboardRoute
+  '/examshield': typeof ExamshieldRoute
   '/generated': typeof GeneratedRoute
   '/impact': typeof ImpactRoute
   '/saved': typeof SavedRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/architecture': typeof ArchitectureRoute
   '/create': typeof CreateRoute
   '/dashboard': typeof DashboardRoute
+  '/examshield': typeof ExamshieldRoute
   '/generated': typeof GeneratedRoute
   '/impact': typeof ImpactRoute
   '/saved': typeof SavedRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/create'
     | '/dashboard'
+    | '/examshield'
     | '/generated'
     | '/impact'
     | '/saved'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/create'
     | '/dashboard'
+    | '/examshield'
     | '/generated'
     | '/impact'
     | '/saved'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/create'
     | '/dashboard'
+    | '/examshield'
     | '/generated'
     | '/impact'
     | '/saved'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   ArchitectureRoute: typeof ArchitectureRoute
   CreateRoute: typeof CreateRoute
   DashboardRoute: typeof DashboardRoute
+  ExamshieldRoute: typeof ExamshieldRoute
   GeneratedRoute: typeof GeneratedRoute
   ImpactRoute: typeof ImpactRoute
   SavedRoute: typeof SavedRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/generated'
       fullPath: '/generated'
       preLoaderRoute: typeof GeneratedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/examshield': {
+      id: '/examshield'
+      path: '/examshield'
+      fullPath: '/examshield'
+      preLoaderRoute: typeof ExamshieldRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArchitectureRoute: ArchitectureRoute,
   CreateRoute: CreateRoute,
   DashboardRoute: DashboardRoute,
+  ExamshieldRoute: ExamshieldRoute,
   GeneratedRoute: GeneratedRoute,
   ImpactRoute: ImpactRoute,
   SavedRoute: SavedRoute,
@@ -208,3 +229,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

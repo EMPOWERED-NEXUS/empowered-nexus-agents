@@ -21,7 +21,10 @@ export function SiteFooter() {
         </div>
         <div className="text-sm text-muted-foreground md:text-right">
           © {new Date().getFullYear()} EmpowerEd Nexus.<br />
-          Learn, Heal, Innovate &amp; Thrive.
+          Learn, Heal, Innovate &amp; Thrive.<br />
+          <span className="mt-2 inline-block">
+            Prototype built for the Google for Startups AI Agents Challenge.
+          </span>
         </div>
       </div>
     </footer>
