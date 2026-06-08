@@ -484,8 +484,8 @@ function CreatePage() {
 
           <div className="mt-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <p className="text-xs text-muted-foreground">
-              Demo generation flow — a structured lesson-pack simulation. Gemini-ready architecture:
-              API wiring lives in <code className="rounded bg-muted px-1.5 py-0.5">src/lib/lesson.ts</code>.
+              Prototype workflow: Generates a structured EduBox-ready lesson pack from the
+              selected classroom context.
             </p>
             <button
               type="submit"

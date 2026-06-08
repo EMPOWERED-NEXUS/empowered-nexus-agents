@@ -19,16 +19,32 @@ function TestingPage() {
   return (
     <SiteLayout>
       <section className="mx-auto max-w-4xl px-5 pt-12 pb-16">
-        <div className="rounded-3xl border border-border bg-card p-6 md:p-10">
+        <div className="mb-6 rounded-xl border border-border bg-card p-5 md:p-6">
+          <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Live demo</div>
+              <a href="https://edubox-lesson-craft.lovable.app/" target="_blank" rel="noreferrer" className="mt-1 inline-block break-all font-mono text-sm font-semibold text-brand-blue hover:underline">
+                https://edubox-lesson-craft.lovable.app/
+              </a>
+            </div>
+            <div className="text-xs text-muted-foreground">No login required · Works on desktop and mobile</div>
+          </div>
+        </div>
+
+        <div className="mb-6 rounded-xl border border-amber-500/30 bg-amber-400/10 p-4 text-sm text-amber-800">
+          <span className="font-semibold">Current version:</span> structured proof-of-concept generation flow. <span className="font-semibold">Next step:</span> Gemini API integration for live AI generation.
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-6 md:p-8">
           <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Testing Access</h1>
+              <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">Testing Access</h1>
               <p className="mt-2 text-muted-foreground">Quick demo instructions for hackathon judges and pilot reviewers.</p>
             </div>
-            <BrandLockup variant="dark" className="h-12" />
+            <BrandLockup variant="dark" className="h-10" />
           </div>
 
-          <div className="mt-8 text-xs font-semibold uppercase tracking-[0.16em] text-brand-blue">LessonCraft scenario</div>
+          <div className="mt-8 text-xs font-semibold uppercase tracking-wider text-brand-blue">LessonCraft scenario</div>
           <div className="mt-3 grid gap-4 md:grid-cols-2">
             <Info
               label="Demo link"
