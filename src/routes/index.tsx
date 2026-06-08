@@ -32,7 +32,7 @@ function Index() {
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-5 pt-14 pb-16 md:pt-20 md:pb-20 lg:grid-cols-12">
           <div className="lg:col-span-7">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-2.5 py-1 text-xs font-medium text-muted-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-brand-green" /> Prototype · EmpowerEd Nexus
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-green" /> EmpowerEd Nexus · Offline-first AI
             </div>
             <h1 className="mt-5 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl md:text-5xl">
               Offline-ready AI lesson packs for low-connectivity schools.
