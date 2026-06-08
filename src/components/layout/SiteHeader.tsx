@@ -5,11 +5,9 @@ import { BrandMark } from "@/components/brand/Logo";
 
 const NAV = [
   { to: "/", label: "Home" },
-  { to: "/dashboard", label: "Dashboard" },
   { to: "/create", label: "Create Pack" },
-  { to: "/examshield", label: "ExamShield" },
   { to: "/saved", label: "Saved Packs" },
-  { to: "/impact", label: "Impact" },
+  { to: "/examshield", label: "ExamShield" },
   { to: "/architecture", label: "Architecture" },
   { to: "/testing", label: "Testing" },
 ] as const;
@@ -17,7 +15,7 @@ const NAV = [
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-3.5">
         <Link to="/" className="flex items-center gap-2.5" onClick={() => setOpen(false)}>
           <BrandMark className="h-9 w-9" />
@@ -40,9 +38,9 @@ export function SiteHeader() {
         </nav>
         <Link
           to="/create"
-          className="hidden rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-90 lg:inline-flex"
+          className="hidden rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:opacity-90 lg:inline-flex"
         >
-          New Lesson Pack
+          New Pack
         </Link>
         <button
           aria-label="Toggle menu"
