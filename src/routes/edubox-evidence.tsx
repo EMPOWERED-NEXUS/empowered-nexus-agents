@@ -7,8 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   AGENT_MAPPINGS,
   SAMPLE_EVIDENCE_PACKAGE,
-  buildEvidenceReportText,
-  downloadEvidenceReportTxt,
   formatGeneratedDate,
   validateEduboxEvidenceJson,
   validateEduboxEvidencePackage,
@@ -16,6 +14,14 @@ import {
   type ValidationResult,
   type AgentMapping,
 } from "@/lib/eduboxEvidence";
+import {
+  REPORT_MODES,
+  buildEvidenceAgentReportText,
+  downloadEvidenceAgentReportTxt,
+  generateEvidenceReport,
+  type EvidenceAgentReport,
+  type ReportMode,
+} from "@/lib/evidenceReport";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -25,6 +31,7 @@ import {
   FileText,
   Loader2,
   Shield,
+  Sparkles,
   Upload,
   XCircle,
 } from "lucide-react";
@@ -47,6 +54,7 @@ function EduboxEvidencePage() {
   const [rawJson, setRawJson] = useState("");
   const [result, setResult] = useState<ValidationResult | null>(null);
   const [validating, setValidating] = useState(false);
+  const [reportMode, setReportMode] = useState<ReportMode>("school");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleValidate = useCallback(() => {
@@ -92,6 +100,7 @@ function EduboxEvidencePage() {
   }, []);
 
   const pkg = result?.ok ? result.package : null;
+  const report = pkg ? generateEvidenceReport(pkg, reportMode) : null;
 
   return (
     <SiteLayout>
@@ -115,9 +124,18 @@ function EduboxEvidencePage() {
         {pkg && (
           <>
             <PackageSummary pkg={pkg} />
-            <EvidenceReportPreview pkg={pkg} />
+            <PackageDetailPreview pkg={pkg} />
+            {report && (
+              <EvidenceAgentReportPreview
+                report={report}
+                mode={reportMode}
+                onModeChange={setReportMode}
+              />
+            )}
             <AgentMappingSection actions={pkg.recommended_agent_actions} />
-            <ExportPanel pkg={pkg} />
+            {report && (
+              <ExportPanel report={report} generatedAt={pkg.generated_at} />
+            )}
           </>
         )}
       </section>
@@ -129,7 +147,7 @@ function Hero() {
   return (
     <div className="max-w-3xl">
       <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1 — Evidence Receiver MVP
+        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1 + A2 — Evidence Agent Report
       </div>
       <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
         EduBox Evidence Package Receiver
@@ -305,7 +323,7 @@ function PackageSummary({ pkg }: { pkg: SanitizedEvidencePackage }) {
   );
 }
 
-function EvidenceReportPreview({ pkg }: { pkg: SanitizedEvidencePackage }) {
+function PackageDetailPreview({ pkg }: { pkg: SanitizedEvidencePackage }) {
   const cs = pkg.content_summary;
   const qs = pkg.quiz_summary;
   const rs = pkg.resource_rights_summary;
@@ -314,8 +332,8 @@ function EvidenceReportPreview({ pkg }: { pkg: SanitizedEvidencePackage }) {
   return (
     <section className="mt-10">
       <SectionHead
-        title="Evidence report preview"
-        sub="Setup-state report — aggregate data only."
+        title="Package detail preview"
+        sub="Raw validated sections from the EduBox evidence package."
       />
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -399,12 +417,114 @@ function EvidenceReportPreview({ pkg }: { pkg: SanitizedEvidencePackage }) {
   );
 }
 
+function EvidenceAgentReportPreview({
+  report,
+  mode,
+  onModeChange,
+}: {
+  report: EvidenceAgentReport;
+  mode: ReportMode;
+  onModeChange: (mode: ReportMode) => void;
+}) {
+  return (
+    <section className="mt-10">
+      <SectionHead
+        title="Evidence Agent Report Preview"
+        sub="Deterministic impact report — Evidence Agent MVP (no live AI)."
+      />
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {REPORT_MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => onModeChange(m.id)}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              mode === m.id
+                ? "bg-primary text-primary-foreground"
+                : "border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+            title={m.description}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {REPORT_MODES.find((m) => m.id === mode)?.description}
+      </p>
+
+      <div className="mt-6 rounded-3xl border border-border bg-card p-6 md:p-8">
+        <div className="border-b border-border pb-4">
+          <h3 className="text-lg font-semibold">{report.title}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {report.deviceLabel} · Evidence generated {report.generatedDate}
+          </p>
+        </div>
+
+        <div className="mt-6 space-y-6">
+          <AgentReportSection section={report.executiveSummary} />
+          <AgentReportSection section={report.learningActivity} />
+          <AgentReportSection section={report.contentCoverage} />
+          <AgentReportSection section={report.quizProgress} />
+          <AgentReportSection section={report.resourceRights} />
+          <AgentReportSection section={report.deviceReadiness} />
+
+          <div>
+            <h4 className="text-sm font-semibold">Recommended Next Actions</h4>
+            <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+              {report.recommendedNextActions.map((action) => (
+                <li key={action}>{action}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-400/10 p-4">
+            <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Safety Notes</h4>
+            <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-amber-900/90 dark:text-amber-100/90">
+              {report.safetyNotes.map((note) => (
+                <li key={note}>{note}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <p className="mt-6 text-xs text-muted-foreground">{report.footer}</p>
+      </div>
+    </section>
+  );
+}
+
+function AgentReportSection({
+  section,
+}: {
+  section: { heading: string; paragraphs: string[]; bullets: string[] };
+}) {
+  return (
+    <div>
+      <h4 className="text-sm font-semibold">{section.heading}</h4>
+      {section.paragraphs.map((p) => (
+        <p key={p} className="mt-2 text-sm text-muted-foreground">
+          {p}
+        </p>
+      ))}
+      {section.bullets.length > 0 && (
+        <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+          {section.bullets.map((b) => (
+            <li key={b}>{b}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function AgentMappingSection({ actions }: { actions: string[] }) {
   return (
     <section className="mt-10">
       <SectionHead
         title="Agent mapping"
-        sub="How this package will feed EmpowerEd Nexus Agents (preview only)."
+        sub="How validated evidence feeds each EmpowerEd Nexus Agent after report generation."
       />
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         {AGENT_MAPPINGS.map((agent) => (
@@ -443,11 +563,11 @@ function StatusBadge({ status }: { status: AgentMapping["status"] }) {
   );
 }
 
-function ExportPanel({ pkg }: { pkg: SanitizedEvidencePackage }) {
-  const copySummary = async () => {
+function ExportPanel({ report, generatedAt }: { report: EvidenceAgentReport; generatedAt: string }) {
+  const copyReport = async () => {
     try {
-      await navigator.clipboard.writeText(buildEvidenceReportText(pkg));
-      toast.success("Evidence summary copied.");
+      await navigator.clipboard.writeText(buildEvidenceAgentReportText(report));
+      toast.success("Evidence Agent report copied.");
     } catch {
       toast.error("Could not copy to clipboard.");
     }
@@ -456,24 +576,24 @@ function ExportPanel({ pkg }: { pkg: SanitizedEvidencePackage }) {
   return (
     <section className="mt-10 rounded-3xl border border-border bg-card p-6">
       <SectionHead
-        title="Report export"
-        sub="Setup-state actions — live send requires admin approval."
+        title="Evidence Agent export"
+        sub="Copy or download the impact report. Live send and AI generation remain setup-state."
       />
       <div className="mt-4 flex flex-wrap gap-2">
-        <Button variant="outline" onClick={copySummary}>
-          <ClipboardCopy className="mr-2 h-4 w-4" /> Copy evidence summary
+        <Button variant="outline" onClick={copyReport}>
+          <ClipboardCopy className="mr-2 h-4 w-4" /> Copy report
         </Button>
-        <Button variant="outline" onClick={() => downloadEvidenceReportTxt(pkg)}>
-          <Download className="mr-2 h-4 w-4" /> Download report .txt
+        <Button variant="outline" onClick={() => downloadEvidenceAgentReportTxt(report, generatedAt)}>
+          <Download className="mr-2 h-4 w-4" /> Download .txt report
         </Button>
         <Button variant="outline" disabled title="PDF export planned for a future phase">
-          <FileText className="mr-2 h-4 w-4" /> Export PDF — coming later
+          <FileText className="mr-2 h-4 w-4" /> PDF — coming later
         </Button>
         <Button variant="outline" disabled title="Requires secure backend handoff">
           Send to Nexus Learn OS — setup-state
         </Button>
-        <Button variant="outline" disabled title="Requires admin-approved agent ingestion">
-          Send to EduBox Agents — setup-state
+        <Button variant="outline" disabled title="Requires admin-approved server-side AI integration">
+          <Sparkles className="mr-2 h-4 w-4" /> Generate with AI Agent — setup-state
         </Button>
       </div>
     </section>
