@@ -7,6 +7,7 @@ const NAV = [
   { to: "/", label: "Home" },
   { to: "/create", label: "Create Pack" },
   { to: "/saved", label: "Saved Packs" },
+  { to: "/edubox-evidence", label: "Evidence Receiver" },
   { to: "/examshield", label: "ExamShield" },
   { to: "/architecture", label: "Architecture" },
   { to: "/testing", label: "Testing" },

@@ -14,6 +14,7 @@ import { Route as SavedRouteImport } from './routes/saved'
 import { Route as ImpactRouteImport } from './routes/impact'
 import { Route as GeneratedRouteImport } from './routes/generated'
 import { Route as ExamshieldRouteImport } from './routes/examshield'
+import { Route as EduboxEvidenceRouteImport } from './routes/edubox-evidence'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as CreateRouteImport } from './routes/create'
 import { Route as ArchitectureRouteImport } from './routes/architecture'
@@ -44,6 +45,11 @@ const ExamshieldRoute = ExamshieldRouteImport.update({
   path: '/examshield',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EduboxEvidenceRoute = EduboxEvidenceRouteImport.update({
+  id: '/edubox-evidence',
+  path: '/edubox-evidence',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/architecture': typeof ArchitectureRoute
   '/create': typeof CreateRoute
   '/dashboard': typeof DashboardRoute
+  '/edubox-evidence': typeof EduboxEvidenceRoute
   '/examshield': typeof ExamshieldRoute
   '/generated': typeof GeneratedRoute
   '/impact': typeof ImpactRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/architecture': typeof ArchitectureRoute
   '/create': typeof CreateRoute
   '/dashboard': typeof DashboardRoute
+  '/edubox-evidence': typeof EduboxEvidenceRoute
   '/examshield': typeof ExamshieldRoute
   '/generated': typeof GeneratedRoute
   '/impact': typeof ImpactRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/architecture': typeof ArchitectureRoute
   '/create': typeof CreateRoute
   '/dashboard': typeof DashboardRoute
+  '/edubox-evidence': typeof EduboxEvidenceRoute
   '/examshield': typeof ExamshieldRoute
   '/generated': typeof GeneratedRoute
   '/impact': typeof ImpactRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/create'
     | '/dashboard'
+    | '/edubox-evidence'
     | '/examshield'
     | '/generated'
     | '/impact'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/create'
     | '/dashboard'
+    | '/edubox-evidence'
     | '/examshield'
     | '/generated'
     | '/impact'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/architecture'
     | '/create'
     | '/dashboard'
+    | '/edubox-evidence'
     | '/examshield'
     | '/generated'
     | '/impact'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   ArchitectureRoute: typeof ArchitectureRoute
   CreateRoute: typeof CreateRoute
   DashboardRoute: typeof DashboardRoute
+  EduboxEvidenceRoute: typeof EduboxEvidenceRoute
   ExamshieldRoute: typeof ExamshieldRoute
   GeneratedRoute: typeof GeneratedRoute
   ImpactRoute: typeof ImpactRoute
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExamshieldRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/edubox-evidence': {
+      id: '/edubox-evidence'
+      path: '/edubox-evidence'
+      fullPath: '/edubox-evidence'
+      preLoaderRoute: typeof EduboxEvidenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   ArchitectureRoute: ArchitectureRoute,
   CreateRoute: CreateRoute,
   DashboardRoute: DashboardRoute,
+  EduboxEvidenceRoute: EduboxEvidenceRoute,
   ExamshieldRoute: ExamshieldRoute,
   GeneratedRoute: GeneratedRoute,
   ImpactRoute: ImpactRoute,
