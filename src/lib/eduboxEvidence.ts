@@ -159,8 +159,16 @@ export const AGENT_MAPPINGS: AgentMapping[] = [
     agent: "Teacher Support Agent",
     role: "Teaching recommendations and classroom readiness",
     status: "Setup-state",
-    detail: "Uses recommended next actions and readiness flags for onboarding guidance — no teacher PII.",
-    usesFromPackage: ["recommended_next_actions", "readiness_flags", "quiz_summary"],
+    detail:
+      "Generates the Teacher Support Action Plan — priorities, 7-day plan, discussion prompts, and sync next steps.",
+    usesFromPackage: [
+      "priority_focus",
+      "weekly_plan",
+      "discussion_prompts",
+      "quiz_review_actions",
+      "resource_usage_actions",
+      "sync_reporting_next_step",
+    ],
   },
   {
     agent: "Sync and Operations Agent",

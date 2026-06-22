@@ -31,6 +31,14 @@ import {
   type RecommendationMode,
 } from "@/lib/lessonCraftRecommendations";
 import {
+  TEACHER_SUPPORT_MODES,
+  buildTeacherSupportPlanText,
+  downloadTeacherSupportPlanTxt,
+  generateTeacherSupportPlan,
+  type TeacherSupportPlan,
+  type TeacherSupportMode,
+} from "@/lib/teacherSupportPlan";
+import {
   AlertTriangle,
   BookOpen,
   CheckCircle2,
@@ -42,6 +50,7 @@ import {
   Shield,
   Sparkles,
   Upload,
+  Users,
   XCircle,
 } from "lucide-react";
 
@@ -65,6 +74,7 @@ function EduboxEvidencePage() {
   const [validating, setValidating] = useState(false);
   const [reportMode, setReportMode] = useState<ReportMode>("school");
   const [lessonCraftMode, setLessonCraftMode] = useState<RecommendationMode>("teacher_support");
+  const [teacherSupportMode, setTeacherSupportMode] = useState<TeacherSupportMode>("classroom_teacher");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleValidate = useCallback(() => {
@@ -112,6 +122,12 @@ function EduboxEvidencePage() {
   const pkg = result?.ok ? result.package : null;
   const report = pkg ? generateEvidenceReport(pkg, reportMode) : null;
   const lessonCraft = pkg ? generateLessonCraftRecommendations(pkg, lessonCraftMode) : null;
+  const teacherPlan =
+    pkg && lessonCraft
+      ? generateTeacherSupportPlan(pkg, teacherSupportMode, lessonCraft)
+      : pkg
+        ? generateTeacherSupportPlan(pkg, teacherSupportMode)
+        : null;
 
   return (
     <SiteLayout>
@@ -150,12 +166,22 @@ function EduboxEvidencePage() {
                 onModeChange={setLessonCraftMode}
               />
             )}
+            {teacherPlan && (
+              <TeacherSupportPlanPreview
+                plan={teacherPlan}
+                mode={teacherSupportMode}
+                onModeChange={setTeacherSupportMode}
+              />
+            )}
             <AgentMappingSection actions={pkg.recommended_agent_actions} />
             {report && (
               <ExportPanel report={report} generatedAt={pkg.generated_at} />
             )}
             {lessonCraft && (
               <LessonCraftExportPanel recommendations={lessonCraft} generatedAt={pkg.generated_at} />
+            )}
+            {teacherPlan && (
+              <TeacherSupportExportPanel plan={teacherPlan} generatedAt={pkg.generated_at} />
             )}
           </>
         )}
@@ -168,7 +194,7 @@ function Hero() {
   return (
     <div className="max-w-3xl">
       <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1–A3 — Evidence & LessonCraft
+        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1–A4 — Agents from EduBox Evidence
       </div>
       <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
         EduBox Evidence Package Receiver
@@ -616,6 +642,83 @@ function LessonCraftRecommendationsPreview({
   );
 }
 
+function TeacherSupportPlanPreview({
+  plan,
+  mode,
+  onModeChange,
+}: {
+  plan: TeacherSupportPlan;
+  mode: TeacherSupportMode;
+  onModeChange: (mode: TeacherSupportMode) => void;
+}) {
+  return (
+    <section className="mt-10">
+      <SectionHead
+        title="Teacher Support Action Plan"
+        sub="Deterministic classroom plan from evidence and LessonCraft — Teacher Support Agent MVP (no live AI)."
+      />
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {TEACHER_SUPPORT_MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => onModeChange(m.id)}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              mode === m.id
+                ? "bg-primary text-primary-foreground"
+                : "border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+            title={m.description}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {TEACHER_SUPPORT_MODES.find((m) => m.id === mode)?.description}
+      </p>
+
+      <div className="mt-6 rounded-3xl border border-border bg-card p-6 md:p-8">
+        <div className="flex items-start gap-3 border-b border-border pb-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-muted">
+            <Users className="h-5 w-5 text-brand-blue" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">{plan.title}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {plan.deviceLabel} · Evidence {plan.generatedDate}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{plan.intro}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <AgentReportSection section={plan.priorityFocus} />
+          <AgentReportSection section={plan.todaysAction} />
+          <AgentReportSection section={plan.weeklyPlan} />
+          <AgentReportSection section={plan.discussionPrompts} />
+          <AgentReportSection section={plan.revisionActivities} />
+          <AgentReportSection section={plan.quizReviewActions} />
+          <AgentReportSection section={plan.resourceUsageActions} />
+          <AgentReportSection section={plan.syncReportingNextStep} />
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-400/10 p-4">
+          <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Safety Notes</h4>
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-amber-900/90 dark:text-amber-100/90">
+            {plan.safetyNotes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="mt-6 text-xs text-muted-foreground">{plan.footer}</p>
+      </div>
+    </section>
+  );
+}
+
 function AgentMappingSection({ actions }: { actions: string[] }) {
   return (
     <section className="mt-10">
@@ -657,6 +760,46 @@ function StatusBadge({ status }: { status: AgentMapping["status"] }) {
         : "bg-muted text-muted-foreground";
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${cls}`}>{status}</span>
+  );
+}
+
+function TeacherSupportExportPanel({
+  plan,
+  generatedAt,
+}: {
+  plan: TeacherSupportPlan;
+  generatedAt: string;
+}) {
+  const copyPlan = async () => {
+    try {
+      await navigator.clipboard.writeText(buildTeacherSupportPlanText(plan));
+      toast.success("Teacher Support plan copied.");
+    } catch {
+      toast.error("Could not copy to clipboard.");
+    }
+  };
+
+  return (
+    <section className="mt-10 rounded-3xl border border-border bg-card p-6">
+      <SectionHead
+        title="Teacher Support export"
+        sub="Copy or download the action plan. Live coaching and AI generation remain setup-state."
+      />
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="outline" onClick={copyPlan}>
+          <ClipboardCopy className="mr-2 h-4 w-4" /> Copy teacher plan
+        </Button>
+        <Button variant="outline" onClick={() => downloadTeacherSupportPlanTxt(plan, generatedAt)}>
+          <Download className="mr-2 h-4 w-4" /> Download teacher plan .txt
+        </Button>
+        <Button variant="outline" disabled title="Requires admin-approved Teacher Support agent ingestion">
+          Send to Teacher Support Agent — setup-state
+        </Button>
+        <Button variant="outline" disabled title="Requires admin-approved server-side coaching integration">
+          <Sparkles className="mr-2 h-4 w-4" /> Generate live coaching — setup-state
+        </Button>
+      </div>
+    </section>
   );
 }
 
