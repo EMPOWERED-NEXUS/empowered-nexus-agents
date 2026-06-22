@@ -145,8 +145,15 @@ export const AGENT_MAPPINGS: AgentMapping[] = [
     agent: "LessonCraft Agent",
     role: "Lesson package planning and content improvement",
     status: "Setup-state",
-    detail: "Uses content coverage and learning gap signals — course/lesson counts and sample titles only.",
-    usesFromPackage: ["content_summary", "course_count", "lesson_count", "content coverage section"],
+    detail:
+      "Generates LessonCraft Recommendations below — follow-up lessons, content improvements, quiz ideas, and offline package suggestions.",
+    usesFromPackage: [
+      "follow_up_lessons",
+      "content_package_improvements",
+      "quiz_improvement_ideas",
+      "resource_rights_actions",
+      "offline_package_suggestions",
+    ],
   },
   {
     agent: "Teacher Support Agent",

@@ -93,7 +93,8 @@ Packages are treated as **untrusted input**. Validation runs before any preview 
 | Phase | Work                                                               |
 | ----- | ------------------------------------------------------------------ |
 | A2    | Evidence Agent deterministic report generator (see `docs/evidence-agent-report-generator.md`) |
-| A3    | Secure backend endpoint; package size limits; admin auth           |
+| A3    | LessonCraft recommendations from evidence (see `docs/lessoncraft-recommendations.md`) |
+| A4    | Secure backend endpoint; package size limits; admin auth           |
 | A4    | Server-side AI narrative (optional); PDF export                    |
 | A5    | LessonCraft / Teacher Support — gap analysis from summaries        |
 | A6    | Sync Ops — scheduled handoff to Nexus Learn OS when online         |
@@ -105,7 +106,10 @@ Live send buttons in the UI remain disabled until backend ingestion and admin ap
 
 - `src/lib/eduboxEvidence.ts` — validator, sanitizer, sample package
 - `src/lib/evidenceReport.ts` — Evidence Agent report generator (Phase A2)
+- `src/lib/lessonCraftRecommendations.ts` — LessonCraft recommendations (Phase A3)
 - `src/routes/edubox-evidence.tsx` — receiver page
 - `src/lib/eduboxEvidence.test.ts` — validation unit tests
 - `src/lib/evidenceReport.test.ts` — report generator tests
+- `src/lib/lessonCraftRecommendations.test.ts` — LessonCraft tests
 - `docs/evidence-agent-report-generator.md` — A2 documentation
+- `docs/lessoncraft-recommendations.md` — A3 documentation

@@ -23,7 +23,16 @@ import {
   type ReportMode,
 } from "@/lib/evidenceReport";
 import {
+  RECOMMENDATION_MODES,
+  buildLessonCraftRecommendationsText,
+  downloadLessonCraftRecommendationsTxt,
+  generateLessonCraftRecommendations,
+  type LessonCraftRecommendations,
+  type RecommendationMode,
+} from "@/lib/lessonCraftRecommendations";
+import {
   AlertTriangle,
+  BookOpen,
   CheckCircle2,
   ClipboardCopy,
   Download,
@@ -55,6 +64,7 @@ function EduboxEvidencePage() {
   const [result, setResult] = useState<ValidationResult | null>(null);
   const [validating, setValidating] = useState(false);
   const [reportMode, setReportMode] = useState<ReportMode>("school");
+  const [lessonCraftMode, setLessonCraftMode] = useState<RecommendationMode>("teacher_support");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleValidate = useCallback(() => {
@@ -101,6 +111,7 @@ function EduboxEvidencePage() {
 
   const pkg = result?.ok ? result.package : null;
   const report = pkg ? generateEvidenceReport(pkg, reportMode) : null;
+  const lessonCraft = pkg ? generateLessonCraftRecommendations(pkg, lessonCraftMode) : null;
 
   return (
     <SiteLayout>
@@ -132,9 +143,19 @@ function EduboxEvidencePage() {
                 onModeChange={setReportMode}
               />
             )}
+            {lessonCraft && (
+              <LessonCraftRecommendationsPreview
+                recommendations={lessonCraft}
+                mode={lessonCraftMode}
+                onModeChange={setLessonCraftMode}
+              />
+            )}
             <AgentMappingSection actions={pkg.recommended_agent_actions} />
             {report && (
               <ExportPanel report={report} generatedAt={pkg.generated_at} />
+            )}
+            {lessonCraft && (
+              <LessonCraftExportPanel recommendations={lessonCraft} generatedAt={pkg.generated_at} />
             )}
           </>
         )}
@@ -147,7 +168,7 @@ function Hero() {
   return (
     <div className="max-w-3xl">
       <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1 + A2 — Evidence Agent Report
+        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1–A3 — Evidence & LessonCraft
       </div>
       <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
         EduBox Evidence Package Receiver
@@ -498,24 +519,100 @@ function EvidenceAgentReportPreview({
 function AgentReportSection({
   section,
 }: {
-  section: { heading: string; paragraphs: string[]; bullets: string[] };
+  section: { heading: string; paragraphs?: string[]; bullets?: string[]; items?: string[] };
 }) {
+  const bullets = section.bullets ?? section.items ?? [];
   return (
     <div>
       <h4 className="text-sm font-semibold">{section.heading}</h4>
-      {section.paragraphs.map((p) => (
+      {section.paragraphs?.map((p) => (
         <p key={p} className="mt-2 text-sm text-muted-foreground">
           {p}
         </p>
       ))}
-      {section.bullets.length > 0 && (
+      {bullets.length > 0 && (
         <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
-          {section.bullets.map((b) => (
+          {bullets.map((b) => (
             <li key={b}>{b}</li>
           ))}
         </ul>
       )}
     </div>
+  );
+}
+
+function LessonCraftRecommendationsPreview({
+  recommendations,
+  mode,
+  onModeChange,
+}: {
+  recommendations: LessonCraftRecommendations;
+  mode: RecommendationMode;
+  onModeChange: (mode: RecommendationMode) => void;
+}) {
+  return (
+    <section className="mt-10">
+      <SectionHead
+        title="LessonCraft Recommendations"
+        sub="Deterministic teaching and content suggestions — LessonCraft Agent MVP (no live AI)."
+      />
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {RECOMMENDATION_MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => onModeChange(m.id)}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              mode === m.id
+                ? "bg-primary text-primary-foreground"
+                : "border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+            title={m.description}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {RECOMMENDATION_MODES.find((m) => m.id === mode)?.description}
+      </p>
+
+      <div className="mt-6 rounded-3xl border border-border bg-card p-6 md:p-8">
+        <div className="flex items-start gap-3 border-b border-border pb-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-muted">
+            <BookOpen className="h-5 w-5 text-brand-green" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">{recommendations.title}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {recommendations.deviceLabel} · Evidence {recommendations.generatedDate}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{recommendations.intro}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <AgentReportSection section={recommendations.followUpLessons} />
+          <AgentReportSection section={recommendations.teacherActions} />
+          <AgentReportSection section={recommendations.contentPackageImprovements} />
+          <AgentReportSection section={recommendations.quizImprovementIdeas} />
+          <AgentReportSection section={recommendations.resourceRightsActions} />
+          <AgentReportSection section={recommendations.offlinePackageSuggestions} />
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-400/10 p-4">
+          <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Safety Notes</h4>
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-amber-900/90 dark:text-amber-100/90">
+            {recommendations.safetyNotes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="mt-6 text-xs text-muted-foreground">{recommendations.footer}</p>
+      </div>
+    </section>
   );
 }
 
@@ -560,6 +657,49 @@ function StatusBadge({ status }: { status: AgentMapping["status"] }) {
         : "bg-muted text-muted-foreground";
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${cls}`}>{status}</span>
+  );
+}
+
+function LessonCraftExportPanel({
+  recommendations,
+  generatedAt,
+}: {
+  recommendations: LessonCraftRecommendations;
+  generatedAt: string;
+}) {
+  const copyRecommendations = async () => {
+    try {
+      await navigator.clipboard.writeText(buildLessonCraftRecommendationsText(recommendations));
+      toast.success("LessonCraft recommendations copied.");
+    } catch {
+      toast.error("Could not copy to clipboard.");
+    }
+  };
+
+  return (
+    <section className="mt-10 rounded-3xl border border-border bg-card p-6">
+      <SectionHead
+        title="LessonCraft export"
+        sub="Copy or download recommendations. Live LessonCraft and AI generation remain setup-state."
+      />
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="outline" onClick={copyRecommendations}>
+          <ClipboardCopy className="mr-2 h-4 w-4" /> Copy recommendations
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => downloadLessonCraftRecommendationsTxt(recommendations, generatedAt)}
+        >
+          <Download className="mr-2 h-4 w-4" /> Download recommendations .txt
+        </Button>
+        <Button variant="outline" disabled title="Requires admin-approved LessonCraft agent ingestion">
+          Send to LessonCraft Agent — setup-state
+        </Button>
+        <Button variant="outline" disabled title="Requires admin-approved server-side AI integration">
+          <Sparkles className="mr-2 h-4 w-4" /> Generate with AI Agent — setup-state
+        </Button>
+      </div>
+    </section>
   );
 }
 
