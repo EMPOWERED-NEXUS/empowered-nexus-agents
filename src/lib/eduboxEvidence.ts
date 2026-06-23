@@ -192,6 +192,21 @@ export const AGENT_MAPPINGS: AgentMapping[] = [
     detail: "Future phase: quiz and assessment readiness from aggregate attempt patterns — no individual attempts.",
     usesFromPackage: ["quiz_progress", "quiz_summary", "quiz_attempt_count"],
   },
+  {
+    agent: "Nexus Passport Bridge",
+    role: "Identity, verification, certificates, badges, entitlements, and learning proof",
+    status: "Setup-state",
+    detail:
+      "Generates Passport Bridge Readiness — proof categories, missing requirements, and privacy boundaries. No live Passport connection in A6.",
+    usesFromPackage: [
+      "learning_proof_readiness",
+      "certificate_readiness",
+      "badge_readiness",
+      "entitlement_readiness",
+      "proof_categories",
+      "required_missing_fields",
+    ],
+  },
 ];
 
 export const SAMPLE_EVIDENCE_PACKAGE: SanitizedEvidencePackage = {

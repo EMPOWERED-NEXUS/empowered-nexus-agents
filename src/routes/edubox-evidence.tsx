@@ -47,6 +47,14 @@ import {
   type SyncOperationsPlan,
 } from "@/lib/syncOperationsPlan";
 import {
+  PASSPORT_BRIDGE_MODES,
+  buildPassportBridgeReadinessText,
+  downloadPassportBridgeReadinessTxt,
+  generatePassportBridgeReadiness,
+  type PassportBridgeMode,
+  type PassportBridgeReadiness,
+} from "@/lib/passportBridgeReadiness";
+import {
   AlertTriangle,
   BookOpen,
   CheckCircle2,
@@ -54,6 +62,7 @@ import {
   Download,
   FileJson,
   FileText,
+  Fingerprint,
   HardDrive,
   Loader2,
   Shield,
@@ -85,6 +94,7 @@ function EduboxEvidencePage() {
   const [lessonCraftMode, setLessonCraftMode] = useState<RecommendationMode>("teacher_support");
   const [teacherSupportMode, setTeacherSupportMode] = useState<TeacherSupportMode>("classroom_teacher");
   const [operationsMode, setOperationsMode] = useState<OperationsMode>("device_operator");
+  const [passportMode, setPassportMode] = useState<PassportBridgeMode>("student_passport");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleValidate = useCallback(() => {
@@ -139,6 +149,7 @@ function EduboxEvidencePage() {
         ? generateTeacherSupportPlan(pkg, teacherSupportMode)
         : null;
   const syncPlan = pkg ? generateSyncOperationsPlan(pkg, operationsMode) : null;
+  const passportReadiness = pkg ? generatePassportBridgeReadiness(pkg, passportMode) : null;
 
   return (
     <SiteLayout>
@@ -191,6 +202,13 @@ function EduboxEvidencePage() {
                 onModeChange={setOperationsMode}
               />
             )}
+            {passportReadiness && (
+              <PassportBridgeReadinessPreview
+                readiness={passportReadiness}
+                mode={passportMode}
+                onModeChange={setPassportMode}
+              />
+            )}
             <AgentMappingSection actions={pkg.recommended_agent_actions} />
             {report && (
               <ExportPanel report={report} generatedAt={pkg.generated_at} />
@@ -204,6 +222,9 @@ function EduboxEvidencePage() {
             {syncPlan && (
               <SyncOperationsExportPanel plan={syncPlan} generatedAt={pkg.generated_at} />
             )}
+            {passportReadiness && (
+              <PassportBridgeExportPanel readiness={passportReadiness} generatedAt={pkg.generated_at} />
+            )}
           </>
         )}
       </section>
@@ -215,7 +236,7 @@ function Hero() {
   return (
     <div className="max-w-3xl">
       <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1–A5 — Agents from EduBox Evidence
+        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1–A6 — Agents & Passport Bridge
       </div>
       <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
         EduBox Evidence Package Receiver
@@ -882,6 +903,164 @@ function SyncOperationsPreview({
   );
 }
 
+function PassportLevelBadge({ level }: { level: string }) {
+  const cls =
+    level === "partial" || level === "ready"
+      ? "bg-[color-mix(in_oklab,var(--color-brand-green)_18%,transparent)] text-[color:var(--color-brand-green)]"
+      : level === "setup"
+        ? "bg-muted text-muted-foreground"
+        : level === "missing"
+          ? "bg-destructive/15 text-destructive"
+          : "bg-amber-400/20 text-amber-800 dark:text-amber-200";
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${cls}`}>
+      {level}
+    </span>
+  );
+}
+
+function PassportReadinessCard({ section }: { section: PassportBridgeReadiness["learningProofReadiness"] }) {
+  return (
+    <div className="rounded-2xl border border-border bg-background p-4">
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-sm font-semibold">{section.heading}</h4>
+        <PassportLevelBadge level={section.level} />
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">{section.summary}</p>
+      <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+        {section.items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function PassportBridgeReadinessPreview({
+  readiness,
+  mode,
+  onModeChange,
+}: {
+  readiness: PassportBridgeReadiness;
+  mode: PassportBridgeMode;
+  onModeChange: (mode: PassportBridgeMode) => void;
+}) {
+  return (
+    <section className="mt-10">
+      <SectionHead
+        title="Nexus Passport Bridge Readiness"
+        sub="Phase A6 — readiness preview only. Real Passport sync, credentials, and badges are NOT connected."
+      />
+
+      <div className="mt-4 rounded-2xl border border-dashed border-border bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+        <span className="font-semibold text-foreground">Setup-state:</span>{" "}
+        {readiness.passportBridgeStatus.summary}
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {PASSPORT_BRIDGE_MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => onModeChange(m.id)}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              mode === m.id
+                ? "bg-primary text-primary-foreground"
+                : "border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+            title={m.description}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {PASSPORT_BRIDGE_MODES.find((m) => m.id === mode)?.description}
+      </p>
+
+      <div className="mt-6 rounded-3xl border border-border bg-card p-6 md:p-8">
+        <div className="flex items-start gap-3 border-b border-border pb-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-muted">
+            <Fingerprint className="h-5 w-5 text-brand-blue" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">{readiness.title}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {readiness.deviceLabel} · Evidence {readiness.generatedDate}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{readiness.intro}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <PassportReadinessCard section={readiness.passportBridgeStatus} />
+          <PassportReadinessCard section={readiness.learningProofReadiness} />
+          <PassportReadinessCard section={readiness.certificateReadiness} />
+          <PassportReadinessCard section={readiness.badgeReadiness} />
+          <PassportReadinessCard section={readiness.entitlementReadiness} />
+          <PassportReadinessCard section={readiness.schoolVerificationReadiness} />
+          <PassportReadinessCard section={readiness.auditLogReadiness} />
+        </div>
+
+        <div className="mt-6">
+          <h4 className="text-sm font-semibold">Future Proof Categories</h4>
+          <ul className="mt-3 grid gap-2 md:grid-cols-2">
+            {readiness.proofCategories.map((cat) => (
+              <li key={cat.id} className="rounded-xl border border-border bg-background p-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">{cat.label}</span>
+                  <PassportLevelBadge level={cat.level} />
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{cat.detail}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-400/10 p-4">
+          <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+            Missing Requirements Before Real Passport Sync
+          </h4>
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-amber-900/90 dark:text-amber-100/90">
+            {readiness.requiredMissingFields.map((field) => (
+              <li key={field}>{field}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-border bg-muted/30 p-4">
+          <h4 className="text-sm font-semibold">Privacy Boundaries</h4>
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+            {readiness.privacyConstraints.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-6">
+          <h4 className="text-sm font-semibold">Recommended Next Actions</h4>
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+            {readiness.recommendedPassportActions.map((action) => (
+              <li key={action}>{action}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-400/10 p-4">
+          <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Safety Notes</h4>
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-amber-900/90 dark:text-amber-100/90">
+            {readiness.safetyNotes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="mt-6 text-xs text-muted-foreground">{readiness.footer}</p>
+      </div>
+    </section>
+  );
+}
+
 function AgentMappingSection({ actions }: { actions: string[] }) {
   return (
     <section className="mt-10">
@@ -926,6 +1105,52 @@ function StatusBadge({ status }: { status: AgentMapping["status"] }) {
   );
 }
 
+function PassportBridgeExportPanel({
+  readiness,
+  generatedAt,
+}: {
+  readiness: PassportBridgeReadiness;
+  generatedAt: string;
+}) {
+  const copyPlan = async () => {
+    try {
+      await navigator.clipboard.writeText(buildPassportBridgeReadinessText(readiness));
+      toast.success("Passport readiness plan copied.");
+    } catch {
+      toast.error("Could not copy to clipboard.");
+    }
+  };
+
+  return (
+    <section className="mt-10 rounded-3xl border border-border bg-card p-6">
+      <SectionHead
+        title="Nexus Passport Bridge export"
+        sub="Readiness preview only — real Passport sync, credentials, and badges are not connected."
+      />
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="outline" onClick={copyPlan}>
+          <ClipboardCopy className="mr-2 h-4 w-4" /> Copy Passport readiness plan
+        </Button>
+        <Button variant="outline" onClick={() => downloadPassportBridgeReadinessTxt(readiness, generatedAt)}>
+          <Download className="mr-2 h-4 w-4" /> Download Passport readiness .txt
+        </Button>
+        <Button variant="outline" disabled title="Nexus Passport backend not connected in Phase A6">
+          Send to Nexus Passport — setup-state
+        </Button>
+        <Button variant="outline" disabled title="No real certificates created in readiness phase">
+          Create certificate draft — setup-state
+        </Button>
+        <Button variant="outline" disabled title="No real badges minted in readiness phase">
+          Create learning badge draft — setup-state
+        </Button>
+        <Button variant="outline" disabled title="School/device verification requires Passport backend">
+          Verify school/device record — setup-state
+        </Button>
+      </div>
+    </section>
+  );
+}
+
 function SyncOperationsExportPanel({
   plan,
   generatedAt,
@@ -958,7 +1183,7 @@ function SyncOperationsExportPanel({
         <Button variant="outline" disabled title="Requires admin-approved Sync Operations agent ingestion">
           Send to Sync Operations Agent — setup-state
         </Button>
-        <Button variant="outline" disabled title="Nexus Passport bridge not connected in Phase A5">
+        <Button variant="outline" disabled title="Use Nexus Passport Bridge export panel (Phase A6)">
           Send to Nexus Passport — setup-state
         </Button>
         <Button variant="outline" disabled title="Requires secure Nexus Learn OS handoff endpoint">

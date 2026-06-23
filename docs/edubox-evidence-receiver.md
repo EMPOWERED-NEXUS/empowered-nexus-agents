@@ -13,116 +13,96 @@ EduBox devices export aggregate operational evidence from `/agent-bridge/evidenc
 
 No packages are persisted. No AI providers are called from the browser.
 
-## Supported agents (Phases A1–A5)
+## Complete EmpowerEd Nexus ecosystem
 
-After validation, the receiver drives these deterministic agent previews:
+Phase A6 adds Passport bridge **readiness only** — not a live Passport connection.
+
+```text
+┌──────────────────┐
+│  EduBox Device   │  Offline micro-cloud: courses, lessons, quizzes, sync logs
+│  (offline layer) │
+└────────┬─────────┘
+         │ evidence-package.json (manual paste/upload)
+         ▼
+┌──────────────────────────┐
+│  Empowered Nexus Agents  │  Intelligence layer: validate, report, recommend,
+│  (this app)              │  plan, ops guidance, Passport readiness preview
+└────────┬─────────────────┘
+         │ future secure bridges (setup-state today)
+         ├──────────────────────┐
+         ▼                      ▼
+┌──────────────────┐   ┌──────────────────┐
+│  Nexus Learn OS  │   │  Nexus Passport  │
+│  (online LMS)    │   │  (proof layer)   │
+└──────────────────┘   └──────────────────┘
+   School management      Identity, verification,
+   online handoff         certificates, badges,
+                          entitlements, audit trail
+```
+
+| Layer | Role | A6 status |
+|-------|------|-----------|
+| **EduBox Device** | Offline content delivery and local evidence export | Active — source of packages |
+| **Empowered Nexus Agents** | Validate evidence; run agent MVPs; Passport readiness | Active — Phases A1–A6 |
+| **Nexus Learn OS** | Online learning and school management | Not connected — setup-state send |
+| **Nexus Passport** | Learning proof, credentials, entitlements | **Readiness preview only** — no live sync |
+
+## Supported agents (Phases A1–A6)
 
 | Agent | Phase | Output | Doc |
 |-------|-------|--------|-----|
-| **Evidence Agent** | A2 | Impact report (school, NGO, internal, community modes) | `docs/evidence-agent-report-generator.md` |
-| **LessonCraft Agent** | A3 | Content and teaching recommendations | `docs/lessoncraft-recommendations.md` |
-| **Teacher Support Agent** | A4 | Classroom action plan (7-day, prompts, quiz review) | `docs/teacher-support-action-plan.md` |
-| **Sync Operations Agent** | A5 | Device health, sync readiness, launch checklist | `docs/sync-operations-device-health.md` |
-| **ExamShield Agent** | Future | Assessment integrity (not yet implemented) | — |
-| **Nexus Passport Bridge** | Future | Learning proof and credentials (readiness preview only in A5) | `docs/sync-operations-device-health.md` |
+| **Evidence Agent** | A2 | Impact report | `docs/evidence-agent-report-generator.md` |
+| **LessonCraft Agent** | A3 | Content recommendations | `docs/lessoncraft-recommendations.md` |
+| **Teacher Support Agent** | A4 | Classroom action plan | `docs/teacher-support-action-plan.md` |
+| **Sync Operations Agent** | A5 | Device health and sync ops | `docs/sync-operations-device-health.md` |
+| **Nexus Passport Bridge** | A6 | Proof readiness preview | `docs/nexus-passport-bridge-readiness.md` |
+| **ExamShield Agent** | Future | Assessment integrity | — |
 
-All live send buttons (Nexus Learn OS, Passport, AI agents) remain **disabled** until secure backend integration exists.
+All live send buttons (Passport, Learn OS, AI agents, certificate/badge minting) remain **disabled**.
 
 ## Architecture: EduBox → Agents
 
 ```text
-┌─────────────────────┐     evidence-package.json      ┌──────────────────────────┐
-│  EduBox (offline)   │  ───────────────────────────►  │  empowered-nexus-agents  │
-│  Django device      │     paste / upload (manual)    │  Evidence Receiver       │
-└─────────────────────┘                                └────────────┬─────────────┘
-                                                                    │
-         Evidence · LessonCraft · Teacher Support · Sync Ops ───────┤
-         Future: Passport proof · Learn OS sync · ExamShield ───────┘
+EduBox JSON → validate → Evidence · LessonCraft · Teacher Support · Sync Ops · Passport readiness
 ```
-
-| Layer | Role |
-|-------|------|
-| EduBox | Generates `edubox_agent_evidence_package` JSON with aggregate counts and summaries |
-| Agents app | Validates untrusted input, previews reports and plans, maps to agent workflows |
-| Nexus Learn OS | Future online LMS handoff (setup-state) |
-| Nexus Passport | Future identity and learning proof (readiness preview only) |
-| Future backend | Signed upload, admin approval, agent orchestration (no browser AI keys) |
 
 ## Accepted package shape
 
-Required:
+Required: `package_type` = `edubox_agent_evidence_package`, `generated_at` (ISO string).
 
-- `package_type`: `"edubox_agent_evidence_package"`
-- `generated_at`: ISO timestamp string
-
-Expected fields (optional with safe defaults):
-
-| Field | Type |
-|-------|------|
-| `device_label` | string |
-| `course_count`, `lesson_count`, `resource_count` | number |
-| `offline_allowed_resource_count`, `online_only_resource_count` | number |
-| `quiz_attempt_count`, `sync_log_count` | number |
-| `average_score_percent` | number or null |
-| `readiness_flags` | object (boolean / number / string values) |
-| `content_summary`, `quiz_summary`, `resource_rights_summary`, `device_health_summary` | object |
-| `recommended_agent_actions` | string array |
-| `privacy_note` | string |
-
-Schema reference: `edubox-agent-evidence/0.1` (EduBox Phase 12 — `agent_package_utils.py`).
+See EduBox Phase 12 (`agent_package_utils.py`) for full schema.
 
 ## Privacy boundaries
 
-**Included (aggregate only):**
-
-- Course/lesson/resource counts and sample titles
-- Quiz attempt totals and averages
-- Sync log counts and readiness flags
-- Device label (non-secret preview label)
-
-**Never ingested for preview (stripped + warning):**
-
-- `password`, `passwords`, `raw_password`
-- `secret`, `token`, `api_key`, `service_credentials`
-- `email`, `emails`
-- `raw_media`, `media_file`
-- `private_learner_records`
-- Additional EduBox guardrails: `username`, `full_name`, `device_token`, etc.
-
-Packages are treated as **untrusted input**. Validation runs before any preview render. Text is rendered as React text nodes only (no `dangerouslySetInnerHTML`).
+Aggregate counts and sample titles only. Forbidden fields stripped with warnings. React text rendering only.
 
 ## Manual test steps
 
-1. Start EduBox (optional): `http://127.0.0.1:8000/agent-bridge/evidence-package.json`
-2. Start agents app: `npm run dev`
-3. Open `/edubox-evidence` (nav: **Evidence Receiver**)
-4. Click **Load sample package** → **Validate package**
-5. Scroll through: Evidence report, LessonCraft, Teacher Support, Sync Operations sections
-6. Test copy/download on each agent export panel
-7. Paste JSON with forbidden field → warning, excluded from previews
-8. Confirm all **Send to …** and **Generate with AI** buttons are disabled
+1. `npm run dev` → `/edubox-evidence`
+2. **Load sample package** → **Validate**
+3. Walk all agent sections including **Nexus Passport Bridge Readiness**
+4. Confirm setup-state banners and disabled send/create buttons
+5. Export copy/download for each agent panel
 
-## Future live integration plan
+## Future integration plan
 
 | Phase | Work |
 |-------|------|
-| A2 | Evidence Agent report — done |
-| A3 | LessonCraft recommendations — done |
-| A4 | Teacher Support action plan — done |
-| A5 | Sync Operations and device health — done |
-| A6 | Secure backend endpoint; admin auth |
-| B1 | Nexus Passport bridge |
-| B2 | Nexus Learn OS signed sync |
-| B3 | ExamShield assessment integrity |
-| B4 | Server-side AI (optional; never browser keys) |
+| A1–A6 | Receiver and agent MVPs — **done** |
+| B1 | Secure backend ingest; admin auth |
+| B2 | Nexus Passport live bridge (server-side) |
+| B3 | Nexus Learn OS signed sync |
+| B4 | ExamShield assessment integrity |
+| B5 | Server-side AI (optional; never browser keys) |
 
 ## Implementation files
 
-- `src/lib/eduboxEvidence.ts` — validator, sanitizer, sample package
+- `src/lib/eduboxEvidence.ts` — validator (A1)
 - `src/lib/evidenceReport.ts` — Evidence Agent (A2)
 - `src/lib/lessonCraftRecommendations.ts` — LessonCraft (A3)
 - `src/lib/teacherSupportPlan.ts` — Teacher Support (A4)
 - `src/lib/syncOperationsPlan.ts` — Sync Operations (A5)
-- `src/routes/edubox-evidence.tsx` — receiver page
+- `src/lib/passportBridgeReadiness.ts` — Passport Bridge (A6)
+- `src/routes/edubox-evidence.tsx` — receiver UI
 - `src/lib/*.test.ts` — unit tests
-- `docs/*.md` — agent documentation
+- `docs/*.md` — documentation
