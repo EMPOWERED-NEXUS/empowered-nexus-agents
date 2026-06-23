@@ -39,6 +39,14 @@ import {
   type TeacherSupportMode,
 } from "@/lib/teacherSupportPlan";
 import {
+  OPERATIONS_MODES,
+  buildSyncOperationsPlanText,
+  downloadSyncOperationsPlanTxt,
+  generateSyncOperationsPlan,
+  type OperationsMode,
+  type SyncOperationsPlan,
+} from "@/lib/syncOperationsPlan";
+import {
   AlertTriangle,
   BookOpen,
   CheckCircle2,
@@ -46,6 +54,7 @@ import {
   Download,
   FileJson,
   FileText,
+  HardDrive,
   Loader2,
   Shield,
   Sparkles,
@@ -75,6 +84,7 @@ function EduboxEvidencePage() {
   const [reportMode, setReportMode] = useState<ReportMode>("school");
   const [lessonCraftMode, setLessonCraftMode] = useState<RecommendationMode>("teacher_support");
   const [teacherSupportMode, setTeacherSupportMode] = useState<TeacherSupportMode>("classroom_teacher");
+  const [operationsMode, setOperationsMode] = useState<OperationsMode>("device_operator");
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleValidate = useCallback(() => {
@@ -128,6 +138,7 @@ function EduboxEvidencePage() {
       : pkg
         ? generateTeacherSupportPlan(pkg, teacherSupportMode)
         : null;
+  const syncPlan = pkg ? generateSyncOperationsPlan(pkg, operationsMode) : null;
 
   return (
     <SiteLayout>
@@ -173,6 +184,13 @@ function EduboxEvidencePage() {
                 onModeChange={setTeacherSupportMode}
               />
             )}
+            {syncPlan && (
+              <SyncOperationsPreview
+                plan={syncPlan}
+                mode={operationsMode}
+                onModeChange={setOperationsMode}
+              />
+            )}
             <AgentMappingSection actions={pkg.recommended_agent_actions} />
             {report && (
               <ExportPanel report={report} generatedAt={pkg.generated_at} />
@@ -182,6 +200,9 @@ function EduboxEvidencePage() {
             )}
             {teacherPlan && (
               <TeacherSupportExportPanel plan={teacherPlan} generatedAt={pkg.generated_at} />
+            )}
+            {syncPlan && (
+              <SyncOperationsExportPanel plan={syncPlan} generatedAt={pkg.generated_at} />
             )}
           </>
         )}
@@ -194,7 +215,7 @@ function Hero() {
   return (
     <div className="max-w-3xl">
       <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
-        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1–A4 — Agents from EduBox Evidence
+        <FileJson className="h-3.5 w-3.5 text-brand-blue" /> Phase A1–A5 — Agents from EduBox Evidence
       </div>
       <h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
         EduBox Evidence Package Receiver
@@ -719,6 +740,148 @@ function TeacherSupportPlanPreview({
   );
 }
 
+function OpsStatusBadge({ status }: { status?: "ok" | "warn" | "alert" | "setup" }) {
+  if (!status) return null;
+  const cls =
+    status === "ok"
+      ? "bg-[color-mix(in_oklab,var(--color-brand-green)_18%,transparent)] text-[color:var(--color-brand-green)]"
+      : status === "warn"
+        ? "bg-amber-400/20 text-amber-800 dark:text-amber-200"
+        : status === "setup"
+          ? "bg-muted text-muted-foreground"
+          : "bg-destructive/15 text-destructive";
+  const label =
+    status === "ok" ? "OK" : status === "warn" ? "Warning" : status === "setup" ? "Setup-state" : "Action needed";
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${cls}`}>{label}</span>
+  );
+}
+
+function OpsSectionCard({ section }: { section: SyncOperationsPlan["deviceStatus"] }) {
+  return (
+    <div className="rounded-2xl border border-border bg-background p-4">
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-sm font-semibold">{section.heading}</h4>
+        <OpsStatusBadge status={section.status} />
+      </div>
+      <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+        {section.items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function SyncOperationsPreview({
+  plan,
+  mode,
+  onModeChange,
+}: {
+  plan: SyncOperationsPlan;
+  mode: OperationsMode;
+  onModeChange: (mode: OperationsMode) => void;
+}) {
+  return (
+    <section className="mt-10">
+      <SectionHead
+        title="Sync Operations and Device Health"
+        sub="Deterministic ops guidance — Sync Operations Agent MVP (no live AI, no Passport connection)."
+      />
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        {OPERATIONS_MODES.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => onModeChange(m.id)}
+            className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+              mode === m.id
+                ? "bg-primary text-primary-foreground"
+                : "border border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground"
+            }`}
+            title={m.description}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">
+        {OPERATIONS_MODES.find((m) => m.id === mode)?.description}
+      </p>
+
+      <div className="mt-6 rounded-3xl border border-border bg-card p-6 md:p-8">
+        <div className="flex items-start gap-3 border-b border-border pb-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-muted">
+            <HardDrive className="h-5 w-5 text-brand-blue" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold">{plan.title}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {plan.deviceLabel} · Evidence {plan.generatedDate}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">{plan.intro}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <OpsSectionCard section={plan.deviceStatus} />
+          <OpsSectionCard section={plan.syncStatus} />
+          <OpsSectionCard section={plan.storageOfflineReadiness} />
+          <OpsSectionCard section={plan.contentPackageReadiness} />
+          <OpsSectionCard section={plan.quizProgressReadiness} />
+          <OpsSectionCard section={plan.resourceRightsWarnings} />
+          <OpsSectionCard section={plan.launchReadiness} />
+          <OpsSectionCard section={plan.supportChecklist} />
+        </div>
+
+        <div className="mt-6">
+          <OpsSectionCard section={plan.recommendedNextSyncActions} />
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-dashed border-border bg-muted/30 p-5">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="text-sm font-semibold">Nexus Passport Readiness</h4>
+            <OpsStatusBadge status="setup" />
+          </div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Nexus Passport is not connected in this phase. The evidence package can later support:
+          </p>
+          <ul className="mt-3 space-y-3">
+            {plan.passportBridgePreview.map((item) => (
+              <li key={item.label} className="rounded-xl border border-border bg-card p-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">{item.label}</span>
+                  <span className="text-[10px] font-semibold uppercase text-muted-foreground">
+                    {item.status}
+                  </span>
+                </div>
+                <p className="mt-1 text-muted-foreground">{item.detail}</p>
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-4 list-inside list-disc space-y-1 text-sm text-muted-foreground">
+            {plan.passportReadinessNotes.items.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-6 rounded-2xl border border-amber-500/30 bg-amber-400/10 p-4">
+          <h4 className="text-sm font-semibold text-amber-900 dark:text-amber-100">Safety Notes</h4>
+          <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-amber-900/90 dark:text-amber-100/90">
+            {plan.safetyNotes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="mt-6 text-xs text-muted-foreground">{plan.footer}</p>
+      </div>
+    </section>
+  );
+}
+
 function AgentMappingSection({ actions }: { actions: string[] }) {
   return (
     <section className="mt-10">
@@ -760,6 +923,49 @@ function StatusBadge({ status }: { status: AgentMapping["status"] }) {
         : "bg-muted text-muted-foreground";
   return (
     <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${cls}`}>{status}</span>
+  );
+}
+
+function SyncOperationsExportPanel({
+  plan,
+  generatedAt,
+}: {
+  plan: SyncOperationsPlan;
+  generatedAt: string;
+}) {
+  const copyPlan = async () => {
+    try {
+      await navigator.clipboard.writeText(buildSyncOperationsPlanText(plan));
+      toast.success("Sync Operations plan copied.");
+    } catch {
+      toast.error("Could not copy to clipboard.");
+    }
+  };
+
+  return (
+    <section className="mt-10 rounded-3xl border border-border bg-card p-6">
+      <SectionHead
+        title="Sync Operations export"
+        sub="Copy or download the operations plan. Live send to Learn OS, Passport, and AI remain setup-state."
+      />
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button variant="outline" onClick={copyPlan}>
+          <ClipboardCopy className="mr-2 h-4 w-4" /> Copy operations plan
+        </Button>
+        <Button variant="outline" onClick={() => downloadSyncOperationsPlanTxt(plan, generatedAt)}>
+          <Download className="mr-2 h-4 w-4" /> Download operations plan .txt
+        </Button>
+        <Button variant="outline" disabled title="Requires admin-approved Sync Operations agent ingestion">
+          Send to Sync Operations Agent — setup-state
+        </Button>
+        <Button variant="outline" disabled title="Nexus Passport bridge not connected in Phase A5">
+          Send to Nexus Passport — setup-state
+        </Button>
+        <Button variant="outline" disabled title="Requires secure Nexus Learn OS handoff endpoint">
+          Send to Nexus Learn OS — setup-state
+        </Button>
+      </div>
+    </section>
   );
 }
 

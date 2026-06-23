@@ -172,10 +172,18 @@ export const AGENT_MAPPINGS: AgentMapping[] = [
   },
   {
     agent: "Sync and Operations Agent",
-    role: "Sync health and Nexus Learn OS handoff",
+    role: "Sync health, device operations, and Nexus Learn OS handoff",
     status: "Foundation ready",
-    detail: "Uses device readiness section — sync logs, failures, and configuration flags; secrets never exported.",
-    usesFromPackage: ["device_readiness", "device_health_summary", "sync_log_count"],
+    detail:
+      "Generates Sync Operations and Device Health plan — device/sync status, launch checklist, and Passport readiness preview.",
+    usesFromPackage: [
+      "device_status",
+      "sync_status",
+      "storage_offline_readiness",
+      "launch_readiness",
+      "resource_rights_warnings",
+      "passport_readiness_notes",
+    ],
   },
   {
     agent: "ExamShield Agent",
